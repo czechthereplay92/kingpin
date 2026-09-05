@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Kingpin</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script type="module">
+import { requireAuth, api } from "./js/api.js";
+import { renderShell, loadState } from "./js/nav.js";
+
+requireAuth();
+renderShell();
+
+async function render() {
+  const { user, expToNext } = await loadState();
+  document.getElementById("page-content").innerHTML = `
+    <h2>Welcome back, ${user.username}</h2>
+    <div class="card">
+      <h3>Progress</h3>
+      <p class="meta">Level ${user.level} — ${Math.floor(user.exp)} / ${expToNext} exp to next level</p>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.min(100, (user.exp / expToNext) * 100)}%"></div></div>
+    </div>
+    <div class="card">
+      <h3>Combat stats</h3>
+      <p class="meta">Strength ${Math.floor(user.strength)} · Defense ${Math.floor(user.defense)} · Speed ${Math.floor(user.speed)}</p>
+    </div>
+    <div class="card">
+      <h3>Record</h3>
+      <p class="meta">${user.kills} wins · ${user.losses} losses · Net worth $${Math.floor(user.money + user.bank).toLocaleString()}</p>
+    </div>
+    <div class="card">
+      <h3>Quick actions</h3>
+      <div class="card-row">
+        <a class="btn" href="crimes.html">Commit a crime</a>
+        <a class="btn" href="gym.html">Hit the gym</a>
+        <a class="btn" href="jobs.html">Work a shift</a>
+      </div>
+    </div>
+  `;
+}
+
+render();
+setInterval(render, 15000);
+</script>
+</body>
+</html>

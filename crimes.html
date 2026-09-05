@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crimes — Kingpin</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script type="module">
+import { requireAuth, api } from "./js/api.js";
+import { renderShell, loadState } from "./js/nav.js";
+
+requireAuth();
+renderShell();
+
+const CRIMES = [
+  { id: "pickpocket", name: "Pickpocket a tourist", unlockLevel: 1, braveCost: 3, money: "20–80" },
+  { id: "shoplift", name: "Shoplift from a corner store", unlockLevel: 1, braveCost: 5, money: "40–120" },
+  { id: "car-theft", name: "Boost a car", unlockLevel: 3, braveCost: 10, money: "150–400" },
+  { id: "burglary", name: "Burgle a house", unlockLevel: 5, braveCost: 15, money: "300–700" },
+  { id: "armored-truck", name: "Hit an armored truck", unlockLevel: 9, braveCost: 25, money: "800–1800" },
+  { id: "bank-heist", name: "Rob a bank", unlockLevel: 15, braveCost: 40, money: "2000–5000" },
+];
+
+let currentUser = null;
+
+function renderList() {
+  const html = CRIMES.map((c) => {
+    const locked = currentUser.level < c.unlockLevel;
+    return `
+      <div class="card">
+        <div class="card-row">
+          <div>
+            <h3>${c.name}</h3>
+            <p class="meta">Costs ${c.braveCost} brave · Pays $${c.money} ${locked ? `· Requires level ${c.unlockLevel}` : ""}</p>
+          </div>
+          <button ${locked ? "disabled" : ""} data-id="${c.id}" class="commit-btn">${locked ? "Locked" : "Do it"}</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  document.getElementById("page-content").innerHTML = `<h2>Crimes</h2><div id="result"></div>${html}`;
+
+  document.querySelectorAll(".commit-btn").forEach((btn) => {
+    btn.addEventListener("click", () => runCrime(btn.dataset.id));
+  });
+}
+
+async function runCrime(crimeId) {
+  const resultEl = document.getElementById("result");
+  resultEl.innerHTML = "";
+  try {
+    const data = await api("crime", { method: "POST", body: JSON.stringify({ crimeId }) });
+    currentUser = data.user;
+    let msg = "";
+    if (data.outcome === "success") {
+      msg = `<div class="success-msg">Success! You made $${data.payout}${data.leveledUp ? " and leveled up!" : ""}</div>`;
+    } else if (data.outcome === "failure") {
+      msg = `<div class="error-msg">It didn't work out, but you got away clean.</div>`;
+    } else {
+      msg = `<div class="error-msg">Busted. You're in jail for ${data.jailMinutes} minutes.</div>`;
+    }
+    resultEl.innerHTML = msg;
+    const { maxes } = await loadState();
+    renderList();
+    document.getElementById("result").innerHTML = msg;
+  } catch (err) {
+    resultEl.innerHTML = `<div class="error-msg">${err.message}</div>`;
+  }
+}
+
+async function init() {
+  const { user } = await loadState();
+  currentUser = user;
+  renderList();
+}
+
+init();
+</script>
+</body>
+</html>
