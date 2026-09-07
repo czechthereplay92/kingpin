@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Account Recovery — Kingpin</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="auth-wrap">
+  <div class="auth-card">
+    <h1 style="font-size:1.8rem;">Recovery</h1>
+    <div class="auth-sub">Requires the RESET_SECRET set on this site.</div>
+    <div id="msg"></div>
+
+    <form id="reset-form">
+      <div class="field">
+        <label for="secret">Reset secret</label>
+        <input type="password" id="secret" required>
+      </div>
+      <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" required>
+      </div>
+      <div class="field">
+        <label for="newPassword">New password</label>
+        <input type="password" id="newPassword" required>
+      </div>
+      <div class="field">
+        <label><input type="checkbox" id="makeAdmin" style="width:auto;"> Also grant admin</label>
+      </div>
+      <div class="field">
+        <label><input type="checkbox" id="clearBan" style="width:auto;"> Also clear any ban on this account</label>
+      </div>
+      <button type="submit" class="primary" id="submit-btn">Reset password</button>
+    </form>
+  </div>
+</div>
+
+<script type="module">
+const form = document.getElementById("reset-form");
+const msg = document.getElementById("msg");
+const submitBtn = document.getElementById("submit-btn");
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  msg.innerHTML = "";
+  submitBtn.disabled = true;
+
+  try {
+    const res = await fetch("/api/reset-password", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        secret: document.getElementById("secret").value,
+        username: document.getElementById("username").value.trim(),
+        newPassword: document.getElementById("newPassword").value,
+        makeAdmin: document.getElementById("makeAdmin").checked,
+        clearBan: document.getElementById("clearBan").checked,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Something went wrong.");
+    msg.innerHTML = `<div class="success-msg">Password reset for ${data.username}${data.isAdmin ? " (admin granted)" : ""}. You can log in now.</div>`;
+    form.reset();
+  } catch (err) {
+    msg.innerHTML = `<div class="error-msg">${err.message}</div>`;
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+</script>
+</body>
+</html>
