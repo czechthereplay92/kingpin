@@ -1,4 +1,18 @@
 import { api, clearToken } from "./api.js";
+import { citySkylineSvg } from "./skylines.js";
+
+const CITY_NAME_TO_ID = {
+  "New York City": "new-york",
+  "Chicago": "chicago",
+  "Philadelphia": "philadelphia",
+  "Atlantic City": "atlantic-city",
+  "Las Vegas": "las-vegas",
+  "Miami": "miami",
+};
+
+export function cityIdForName(name) {
+  return CITY_NAME_TO_ID[name] || "new-york";
+}
 
 const NAV_ITEMS = [
   { href: "dashboard.html", label: "Dashboard" },
@@ -27,6 +41,7 @@ export function renderShell() {
         <a href="#" id="logout-link" class="logout-link">Log out</a>
       </nav>
       <main class="main">
+        <div id="hero-banner"></div>
         <div id="rap-sheet" class="rap-sheet"></div>
         <div id="status-banner"></div>
         <div id="page-content"></div>
@@ -50,6 +65,17 @@ function fmtTime(ms) {
 }
 
 export function renderRapSheet(user, maxes) {
+  const heroEl = document.getElementById("hero-banner");
+  if (heroEl) {
+    const cityId = cityIdForName(user.city);
+    heroEl.innerHTML = `
+      <div class="hero-banner">
+        ${citySkylineSvg(cityId, { height: 130 })}
+        <div class="hero-caption">${user.city}</div>
+      </div>
+    `;
+  }
+
   const el = document.getElementById("rap-sheet");
   const bar = (value, max, cls = "") =>
     `<div class="bar-track"><div class="bar-fill ${cls}" style="width:${Math.min(100, (value / max) * 100)}%"></div></div>`;
