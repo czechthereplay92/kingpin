@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leaderboard — Kingpin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script type="module">
+import { requireAuth, api } from "./js/api.js";
+import { renderShell, loadState } from "./js/nav.js";
+
+requireAuth();
+renderShell();
+
+async function render() {
+  const { leaderboard } = await api("leaderboard");  const rows = leaderboard.map((r, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td>${r.username}</td>
+      <td>${r.level}</td>
+      <td>$${r.netWorth.toLocaleString()}</td>
+      <td>${r.kills}-${r.losses}</td>
+    </tr>
+  `).join("");
+
+  document.getElementById("page-content").innerHTML = `
+    <h2>Leaderboard</h2>
+    <div class="card">
+      <table>
+        <thead><tr><th>#</th><th>Player</th><th>Level</th><th>Net worth</th><th>Record</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+async function init() {
+  const [{ user }] = await Promise.all([loadState(), render()]);
+}
+
+init();
+</script>
+</body>
+</html>

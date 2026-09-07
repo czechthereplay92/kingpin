@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attack — Kingpin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script type="module">
+import { requireAuth, api } from "./js/api.js";
+import { renderShell, loadState } from "./js/nav.js";
+
+requireAuth();
+renderShell();
+
+function render() {
+  document.getElementById("page-content").innerHTML = `
+    <h2>Attack</h2>
+    <div id="result"></div>
+    <div class="card">
+      <p class="meta">Fighting risks your own health. Lose, and you're the one waking up in the hospital.</p>
+      <div class="field">
+        <label for="target">Target username</label>
+        <input type="text" id="target" placeholder="Enter a username">
+      </div>
+      <button id="attack-btn">Attack</button>
+    </div>
+  `;
+  document.getElementById("attack-btn").addEventListener("click", attack);
+}
+
+async function attack() {
+  const username = document.getElementById("target").value.trim();
+  const resultEl = document.getElementById("result");
+  if (!username) return;
+  try {
+    const data = await api("attack", { method: "POST", body: JSON.stringify({ username }) });
+    if (data.outcome === "win") {
+      resultEl.innerHTML = `<div class="success-msg">You won the fight and took $${data.stolen} off them.</div>`;
+    } else {
+      resultEl.innerHTML = `<div class="error-msg">You lost. You're in the hospital now.</div>`;
+    }
+    await loadState();
+  } catch (err) {
+    resultEl.innerHTML = `<div class="error-msg">${err.message}</div>`;
+  }
+}
+
+async function init() {
+  await loadState();
+  render();
+}
+
+init();
+</script>
+</body>
+</html>
