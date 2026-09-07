@@ -42,7 +42,7 @@ export function startingState(username, passwordHash) {
     jailUntil: null,
     jailReason: null,
     hospitalUntil: null,
-    city: "Redgate City",
+    city: "New York City",
     travelTo: null,
     travelUntil: null,
     jobId: null,
@@ -63,11 +63,12 @@ export function startingState(username, passwordHash) {
 }
 
 export const CITIES = [
-  { id: "redgate", name: "Redgate City", travelMinutes: 0, unlockLevel: 1 },
-  { id: "millhaven", name: "Millhaven", travelMinutes: 3, unlockLevel: 3 },
-  { id: "east-vance", name: "East Vance", travelMinutes: 6, unlockLevel: 7 },
-  { id: "port-solano", name: "Port Solano", travelMinutes: 10, unlockLevel: 12 },
-  { id: "old-quarter", name: "The Old Quarter", travelMinutes: 15, unlockLevel: 18 },
+  { id: "new-york", name: "New York City", travelMinutes: 0, unlockLevel: 1 },
+  { id: "chicago", name: "Chicago", travelMinutes: 4, unlockLevel: 4 },
+  { id: "philadelphia", name: "Philadelphia", travelMinutes: 6, unlockLevel: 7 },
+  { id: "atlantic-city", name: "Atlantic City", travelMinutes: 8, unlockLevel: 10 },
+  { id: "las-vegas", name: "Las Vegas", travelMinutes: 14, unlockLevel: 15 },
+  { id: "miami", name: "Miami", travelMinutes: 18, unlockLevel: 20 },
 ];
 
 export const CRIMES = [
